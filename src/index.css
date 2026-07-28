@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* LinkedIn-inspired professional blue palette */
+    --background: 210 20% 98%;
+    --foreground: 210 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 20% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 10%;
+    --primary: 210 76% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 14% 93%;
+    --secondary-foreground: 210 20% 15%;
+    --muted: 210 14% 93%;
+    --muted-foreground: 210 10% 45%;
+    --accent: 210 18% 95%;
+    --accent-foreground: 210 20% 10%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 12% 89%;
+    --input: 210 12% 89%;
+    --ring: 210 76% 42%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 20% 10%;
+    --sidebar-primary: 210 76% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 18% 96%;
+    --sidebar-accent-foreground: 210 20% 10%;
+    --sidebar-border: 210 12% 89%;
+    --sidebar-ring: 210 76% 42%;
+
+    --nav-bg: 0 0% 100%;
+    --nav-active: 210 76% 42%;
+    --nav-inactive: 210 10% 50%;
+    --badge-bg: 210 60% 94%;
+    --badge-text: 210 76% 35%;
+    --success: 152 56% 42%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --anonymous: 270 30% 58%;
+    --anonymous-foreground: 0 0% 100%;
+    --story-ring: 210 76% 42%;
+    --story-ring-end: 210 76% 55%;
+    --chat-purple: 270 40% 60%;
+    --chat-blue: 210 76% 42%;
+    --chat-orange: 24 85% 55%;
+    --warm-accent: 210 76% 42%;
+  }
+
+  .dark {
+    --background: 210 15% 7%;
+    --foreground: 210 10% 92%;
+    --card: 210 12% 10%;
+    --card-foreground: 210 10% 92%;
+    --popover: 210 12% 10%;
+    --popover-foreground: 210 10% 92%;
+    --primary: 210 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 10% 14%;
+    --secondary-foreground: 210 10% 92%;
+    --muted: 210 10% 14%;
+    --muted-foreground: 210 8% 55%;
+    --accent: 210 10% 13%;
+    --accent-foreground: 210 10% 92%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 210 10% 92%;
+    --border: 210 8% 16%;
+    --input: 210 8% 16%;
+    --ring: 210 70% 55%;
+
+    --sidebar-background: 210 12% 9%;
+    --sidebar-foreground: 210 8% 88%;
+    --sidebar-primary: 210 70% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 10% 13%;
+    --sidebar-accent-foreground: 210 10% 92%;
+    --sidebar-border: 210 8% 16%;
+    --sidebar-ring: 210 70% 55%;
+
+    --nav-bg: 210 12% 9%;
+    --nav-active: 210 70% 55%;
+    --nav-inactive: 210 8% 50%;
+    --badge-bg: 210 40% 14%;
+    --badge-text: 210 60% 68%;
+    --story-ring: 210 70% 55%;
+    --story-ring-end: 210 60% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+  }
+  #root {
+    @apply bg-background text-foreground;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  button, a, input, textarea, select {
+    @apply transition-colors duration-150;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .tab-bar-height {
+    height: 4rem;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .story-ring {
+    background: conic-gradient(
+      hsl(var(--story-ring)),
+      hsl(var(--story-ring-end)),
+      hsl(var(--story-ring))
+    );
+    padding: 2.5px;
+    border-radius: 9999px;
+  }
+  .story-ring-inner {
+    background: hsl(var(--background));
+    border-radius: 9999px;
+    padding: 2px;
+  }
+
+  .profile-cover {
+    background: linear-gradient(135deg, 
+      hsl(210 76% 42%) 0%, 
+      hsl(210 70% 35%) 50%, 
+      hsl(210 60% 28%) 100%
+    );
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pricing-chat {
+    border: 1.5px solid hsl(var(--chat-purple));
+    background: hsl(var(--chat-purple) / 0.08);
+    color: hsl(var(--chat-purple));
+  }
+  .pricing-audio {
+    border: 1.5px solid hsl(var(--chat-blue));
+    background: hsl(var(--chat-blue) / 0.08);
+    color: hsl(var(--chat-blue));
+  }
+  .pricing-video {
+    border: 1.5px solid hsl(var(--chat-orange));
+    background: hsl(var(--chat-orange) / 0.08);
+    color: hsl(var(--chat-orange));
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
+  }
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md;
+  }
+  .press-scale {
+    @apply transition-transform duration-100 active:scale-[0.97];
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.25s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slideUp 0.25s ease-out;
+  }
+  .chat-wallpaper {
+    background-color: hsl(var(--background));
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e5e5e5' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .font-display {
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .engagement-btn {
+    @apply flex items-center gap-1.5 text-xs text-muted-foreground transition-all duration-200;
+  }
+  .engagement-btn:hover {
+    @apply text-primary;
+  }
+  .engagement-btn:active {
+    @apply scale-95;
+  }
+  .engagement-btn.active {
+    @apply text-primary font-medium;
+  }
+}
