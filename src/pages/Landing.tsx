@@ -3,25 +3,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useRef } from "react";
 import {
   MessageSquareText, Briefcase, GraduationCap, Shield,
-  ArrowRight, CheckCircle2, Plane, Zap
+  ArrowRight, CheckCircle2, Plane, Sparkles, Users, Heart, Repeat2, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
 import cirkLogo from "@/assets/cirkle-logo.png";
 
-/* ─── Journey stops for airplane roadmap ─── */
 const JOURNEY = [
-  { label: "IIT Community", status: "live", caption: "Students + alumni, one verified network", color: "bg-primary" },
-  { label: "Premier Institutes", status: "next", caption: "NITs, IIMs, BITS & more", color: "bg-primary/60" },
-  { label: "Corporate Circles", status: "soon", caption: "Company alumni networks", color: "bg-muted" },
-  { label: "Global Niches", status: "soon", caption: "Sports, arts, regional groups", color: "bg-muted" },
+  { label: "IIT Community", status: "live", caption: "Students + alumni, one verified network" },
+  { label: "Premier Institutes", status: "next", caption: "NITs, IIMs, BITS & more" },
+  { label: "Corporate Circles", status: "soon", caption: "Company alumni networks" },
+  { label: "Global Niches", status: "soon", caption: "Sports, arts, regional groups" },
 ];
 
 const FEATURES = [
-  { icon: MessageSquareText, title: "Community Forum", desc: "Real conversations. Real people. WhatsApp-like simplicity." },
-  { icon: GraduationCap, title: "Consult", desc: "Talk to verified experts." },
-  { icon: Briefcase, title: "Jobs", desc: "Community-driven opportunities." },
-  { icon: Shield, title: "Verified Only", desc: "Every member email-verified." },
+  { icon: MessageSquareText, title: "Community Forum", desc: "Real conversations with real, verified people — as simple as messaging." },
+  { icon: GraduationCap, title: "Consult", desc: "Book time with verified seniors and experts who've done it before." },
+  { icon: Briefcase, title: "Jobs", desc: "Referral-first roles shared inside the community, not scraped from the web." },
+  { icon: Shield, title: "Verified Only", desc: "Institute email verification on every single member. No noise, no bots." },
+];
+
+const STATS = [
+  { value: "23", label: "IIT campuses" },
+  { value: "100%", label: "Email verified" },
+  { value: "0", label: "Cost, forever" },
 ];
 
 const Landing = () => {
@@ -29,7 +34,6 @@ const Landing = () => {
   const { user, loading } = useAuth();
   const journeyRef = useRef<HTMLDivElement>(null);
 
-  // Airplane scroll animation — moves along a wave path
   const { scrollYProgress } = useScroll({ target: journeyRef, offset: ["start end", "end start"] });
   const planeX = useTransform(scrollYProgress, [0, 0.3, 0.5, 0.7, 1], ["5%", "25%", "50%", "75%", "90%"]);
   const planeY = useTransform(scrollYProgress, [0, 0.15, 0.3, 0.45, 0.6, 0.75, 1], ["0px", "-20px", "8px", "-16px", "4px", "-12px", "0px"]);
@@ -52,95 +56,182 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* ─── Hero — immersive, tall, no top nav bar ─── */}
-      <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-5 py-20">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background pointer-events-none" />
-
-        <div className="relative z-10 text-center max-w-2xl mx-auto">
-          {/* Logo + badge */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <img src={cirkLogo} alt="Cirkle" className="w-12 h-12 rounded-xl shadow-sm" />
-            <span className="text-2xl font-bold tracking-tight text-foreground">Cirkle</span>
+      {/* ── Top nav ── */}
+      <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto h-16 px-5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img src={cirkLogo} alt="Cirkle" className="w-8 h-8 rounded-lg" />
+            <span className="font-display text-lg font-bold tracking-tight">Cirkle</span>
           </div>
-
-          <div className="inline-flex items-center gap-1.5 bg-primary/8 text-primary text-[11px] font-semibold px-3 py-1.5 rounded-full mb-6 border border-primary/10">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
-            </span>
-            Live — IIT Community
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] mb-6 text-foreground">
-            Your Community.<br />
-            Your Network.<br />
-            <span className="text-primary">Your Career.</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto mb-10 leading-relaxed">
-            A community-first networking forum + job platform — starting with IITs, expanding to many more communities.
-          </p>
-
-          <Button size="lg" onClick={goAuth} className="rounded-xl px-10 h-13 text-sm font-semibold gap-2 shadow-md hover:shadow-lg transition-all">
-            <Zap className="w-4 h-4" /> Enter my community
-          </Button>
-
-          <div className="mt-8 flex items-center justify-center gap-5 text-xs text-muted-foreground/50">
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-primary/40" /> Free forever</span>
-            <span className="w-px h-4 bg-border" />
-            <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary/40" /> Email verified</span>
+          <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+            <a href="#features" className="story-link hover:text-foreground transition-colors">Product</a>
+            <a href="#journey" className="story-link hover:text-foreground transition-colors">Journey</a>
+            <a href="#join" className="story-link hover:text-foreground transition-colors">Community</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={goAuth} className="rounded-full text-sm font-semibold px-4">Sign in</Button>
+            <Button onClick={goAuth} className="rounded-full text-sm font-semibold px-5 shadow-sm">Join now</Button>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* ─── Features — compact grid ─── */}
-      <section className="py-10 px-5 border-y border-border/40">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/40 mb-4 text-center">What you get</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="bg-card border border-border rounded-xl p-4 text-center hover:border-primary/20 transition-colors">
-                <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center mx-auto mb-2.5">
-                  <f.icon className="w-4 h-4 text-primary" />
+      {/* ── Hero ── */}
+      <section className="relative bg-hero-mesh">
+        <div className="absolute inset-0 bg-grid-faint pointer-events-none" />
+        <div className="relative max-w-6xl mx-auto px-5 pt-16 pb-20 lg:pt-24 lg:pb-28 grid lg:grid-cols-[1.05fr_0.95fr] gap-14 items-center">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <div className="inline-flex items-center gap-2 bg-card/80 text-primary text-[11px] font-semibold px-3 py-1.5 rounded-full mb-7 border border-primary/15 shadow-sm">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary" />
+              </span>
+              Live — IIT Community
+            </div>
+
+            <h1 className="font-display text-[2.6rem] sm:text-6xl lg:text-[4.2rem] font-bold tracking-[-0.03em] leading-[1.03] mb-6">
+              Your community.<br />
+              Your network.<br />
+              <span className="text-gradient-primary">Your career.</span>
+            </h1>
+
+            <p className="text-base sm:text-lg text-muted-foreground max-w-lg mb-9 leading-relaxed">
+              A community-first networking forum and job platform — starting with the IITs,
+              expanding to every circle worth belonging to.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 mb-9">
+              <Button size="lg" onClick={goAuth} className="rounded-full px-8 h-13 text-sm font-semibold gap-2 shadow-elevated">
+                Enter my community <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button size="lg" variant="outline" onClick={goAuth} className="rounded-full px-8 h-13 text-sm font-semibold bg-card/60">
+                Explore the forum
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Free forever</span>
+              <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary" /> Institute email verified</span>
+              <span className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-primary" /> Invite-quality members</span>
+            </div>
+          </motion.div>
+
+          {/* Hero visual — layered product mock */}
+          <motion.div
+            initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}
+            className="relative hidden sm:block"
+          >
+            <div className="absolute -top-5 -left-8 z-20 w-44 rounded-2xl border border-border bg-card p-3 shadow-elevated rotate-[-6deg]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Briefcase className="w-4 h-4 text-primary" />
                 </div>
-                <h3 className="text-xs font-semibold text-foreground mb-1">{f.title}</h3>
-                <p className="text-[10px] text-muted-foreground leading-snug">{f.desc}</p>
+                <div>
+                  <p className="text-[11px] font-semibold leading-tight">New referral</p>
+                  <p className="text-[10px] text-muted-foreground">SDE-2 · Bengaluru</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative z-10 rounded-3xl border border-border bg-card shadow-elevated overflow-hidden">
+              <div className="h-20 profile-cover" />
+              <div className="px-5 pb-5 -mt-8">
+                <div className="w-16 h-16 rounded-2xl bg-secondary border-4 border-card flex items-center justify-center">
+                  <span className="font-display font-bold text-lg text-primary">AK</span>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <p className="font-semibold text-sm">Ananya K.</p>
+                  <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                    <Shield className="w-2.5 h-2.5" /> Verified
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">IIT Bombay ’24 · Product</p>
+
+                <div className="mt-4 rounded-2xl border border-border/70 bg-background p-4">
+                  <p className="text-[13px] leading-relaxed">
+                    Anyone here moved from core to product? Happy to trade notes —
+                    posting my full switch timeline in the forum tonight.
+                  </p>
+                  <div className="mt-3 flex items-center gap-5 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5" /> 128</span>
+                    <span className="flex items-center gap-1"><MessageCircle className="w-3.5 h-3.5" /> 42</span>
+                    <span className="flex items-center gap-1"><Repeat2 className="w-3.5 h-3.5" /> 9</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute -bottom-5 -right-4 z-20 rounded-2xl border border-border bg-card px-4 py-3 shadow-elevated rotate-[5deg]">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Consult booked</p>
+              <p className="text-sm font-semibold flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" /> 30 min · Today</p>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* stats strip */}
+        <div className="relative border-t border-border/70 bg-card/60 backdrop-blur">
+          <div className="max-w-6xl mx-auto px-5 py-6 grid grid-cols-3 divide-x divide-border/70 text-center">
+            {STATS.map((s) => (
+              <div key={s.label}>
+                <p className="font-display text-2xl sm:text-3xl font-bold tracking-tight">{s.value}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1">{s.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Airplane Journey Roadmap ─── */}
-      <section ref={journeyRef} className="py-16 px-5 relative overflow-hidden">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1 text-center">Our Journey</h2>
-          <p className="text-sm text-muted-foreground text-center mb-10">Start with one community. Perfect it. Expand.</p>
+      {/* ── Features ── */}
+      <section id="features" className="py-20 px-5">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary mb-3">What you get</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight max-w-xl mb-12">
+            Everything a real network should be — nothing it shouldn’t.
+          </h2>
 
-          {/* SVG wave path + animated plane */}
-          <div className="relative h-24 mb-8">
-            {/* Background track */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURES.map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="group rounded-2xl border border-border bg-card p-6 hover-lift hover:border-primary/30"
+              >
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                  <f.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
+                </div>
+                <h3 className="font-semibold mb-2">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Journey ── */}
+      <section id="journey" ref={journeyRef} className="py-20 px-5 bg-secondary/40 border-y border-border/70 overflow-hidden">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary mb-3">Our journey</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight mb-3">Start with one community. Perfect it. Expand.</h2>
+            <p className="text-muted-foreground">Cirkle grows one verified circle at a time.</p>
+          </div>
+
+          <div className="relative h-28 mb-10">
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 80" preserveAspectRatio="none">
               <path d="M0,40 C100,10 200,70 300,35 C400,0 500,60 600,30 C700,0 800,50 800,40" stroke="hsl(var(--border))" strokeWidth="2" fill="none" strokeDasharray="6 4" />
               <motion.path d="M0,40 C100,10 200,70 300,35 C400,0 500,60 600,30 C700,0 800,50 800,40"
-                stroke="hsl(var(--primary))" strokeWidth="2.5" fill="none"
-                style={{ pathLength: scrollYProgress }} />
+                stroke="hsl(var(--primary))" strokeWidth="2.5" fill="none" style={{ pathLength: scrollYProgress }} />
             </svg>
-
-            {/* Animated plane */}
-            <motion.div
-              style={{ left: planeX, y: planeY, rotate: planeRotate }}
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10"
-            >
-              <div className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg shadow-primary/30">
+            <motion.div style={{ left: planeX, y: planeY, rotate: planeRotate }} className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10">
+              <div className="bg-primary text-primary-foreground rounded-full p-2.5 shadow-elevated">
                 <Plane className="w-5 h-5" />
               </div>
             </motion.div>
           </div>
 
-          {/* Journey stops */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {JOURNEY.map((stop, i) => (
               <motion.div
                 key={stop.label}
@@ -148,47 +239,55 @@ const Landing = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className={`rounded-xl p-3.5 border transition-all ${
-                  stop.status === "live" ? "bg-card border-primary/25 shadow-sm ring-1 ring-primary/10" :
-                  stop.status === "next" ? "bg-card border-border" :
-                  "bg-muted/20 border-border/40 opacity-50"
+                className={`rounded-2xl p-5 border bg-card transition-all ${
+                  stop.status === "live" ? "border-primary/30 shadow-elevated ring-1 ring-primary/10"
+                  : stop.status === "next" ? "border-border"
+                  : "border-border/50 opacity-60"
                 }`}
               >
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <div className={`w-2 h-2 rounded-full ${stop.color}`} />
-                  <span className="text-xs font-semibold text-foreground">{stop.label}</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-2 h-2 rounded-full ${stop.status === "live" ? "bg-primary" : stop.status === "next" ? "bg-primary/50" : "bg-muted-foreground/40"}`} />
+                  <span className="text-sm font-semibold">{stop.label}</span>
                   {stop.status === "live" && (
-                    <span className="text-[8px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded uppercase ml-auto">Live</span>
+                    <span className="text-[9px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded uppercase ml-auto">Live</span>
                   )}
                 </div>
-                <p className="text-[10px] text-muted-foreground leading-snug">{stop.caption}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{stop.caption}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── Bottom CTA ─── */}
-      <section className="py-14 px-5">
-        <div className="max-w-md mx-auto text-center">
-          <h2 className="text-xl font-bold tracking-tight mb-3">
-            Ready to find your <span className="text-primary">circle</span>?
-          </h2>
-          <p className="text-sm text-muted-foreground mb-6">Verification required. Always free.</p>
-          <Button size="lg" onClick={goAuth} className="rounded-xl px-8 h-12 text-sm font-semibold gap-2">
-            <Zap className="w-4 h-4" /> Enter my community
-          </Button>
+      {/* ── CTA ── */}
+      <section id="join" className="py-24 px-5">
+        <div className="max-w-4xl mx-auto rounded-[2rem] border border-border bg-card shadow-elevated px-8 py-14 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-hero-mesh opacity-70 pointer-events-none" />
+          <div className="relative">
+            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+              Ready to find your <span className="text-gradient-primary">circle</span>?
+            </h2>
+            <p className="text-muted-foreground mb-8">Verification required. Always free.</p>
+            <Button size="lg" onClick={goAuth} className="rounded-full px-9 h-13 text-sm font-semibold gap-2 shadow-elevated">
+              Enter my community <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
-      <footer className="border-t border-border py-5 px-5">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={cirkLogo} alt="Cirkle" className="w-5 h-5 rounded" />
-            <span className="text-sm font-semibold text-foreground">Cirkle</span>
+      {/* ── Footer ── */}
+      <footer className="border-t border-border py-10 px-5">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <img src={cirkLogo} alt="Cirkle" className="w-6 h-6 rounded" />
+            <span className="font-display text-sm font-bold">Cirkle</span>
           </div>
-          <p className="text-[10px] text-muted-foreground/40">© 2026 Cirkle</p>
+          <nav className="flex items-center gap-6 text-xs text-muted-foreground">
+            <a href="#features" className="hover:text-foreground transition-colors">Product</a>
+            <a href="#journey" className="hover:text-foreground transition-colors">Journey</a>
+            <a href="#join" className="hover:text-foreground transition-colors">Join</a>
+          </nav>
+          <p className="text-[11px] text-muted-foreground/60">© 2026 Cirkle</p>
         </div>
       </footer>
     </div>
