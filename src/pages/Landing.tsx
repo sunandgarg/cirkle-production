@@ -120,7 +120,7 @@ const Landing = () => {
             initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}
             className="relative hidden sm:block"
           >
-            <div className="absolute -top-6 -left-6 w-40 rounded-2xl border border-border bg-card p-3 shadow-elevated rotate-[-6deg]">
+            <div className="absolute -top-5 -left-8 z-20 w-44 rounded-2xl border border-border bg-card p-3 shadow-elevated rotate-[-6deg]">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Briefcase className="w-4 h-4 text-primary" />
@@ -132,7 +132,7 @@ const Landing = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-border bg-card shadow-elevated overflow-hidden">
+            <div className="relative z-10 rounded-3xl border border-border bg-card shadow-elevated overflow-hidden">
               <div className="h-20 profile-cover" />
               <div className="px-5 pb-5 -mt-8">
                 <div className="w-16 h-16 rounded-2xl bg-secondary border-4 border-card flex items-center justify-center">
@@ -160,7 +160,7 @@ const Landing = () => {
               </div>
             </div>
 
-            <div className="absolute -bottom-5 -right-4 rounded-2xl border border-border bg-card px-4 py-3 shadow-elevated rotate-[5deg]">
+            <div className="absolute -bottom-5 -right-4 z-20 rounded-2xl border border-border bg-card px-4 py-3 shadow-elevated rotate-[5deg]">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Consult booked</p>
               <p className="text-sm font-semibold flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-primary" /> 30 min · Today</p>
             </div>
