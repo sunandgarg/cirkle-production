@@ -41,25 +41,6 @@ const JOURNEY = [
 
 const MARQUEE = ["IIT Bombay", "IIT Delhi", "IIT Madras", "IIT Kanpur", "IIT Kharagpur", "IIT Roorkee", "IIT Guwahati", "IIT Hyderabad"];
 
-const JOURNEY = [
-  { label: "IIT Community", status: "live", caption: "Students + alumni, one verified network" },
-  { label: "Premier Institutes", status: "next", caption: "NITs, IIMs, BITS & more" },
-  { label: "Corporate Circles", status: "soon", caption: "Company alumni networks" },
-  { label: "Global Niches", status: "soon", caption: "Sports, arts, regional groups" },
-];
-
-const FEATURES = [
-  { icon: MessageSquareText, title: "Community Forum", desc: "Real conversations with real, verified people — as simple as messaging." },
-  { icon: GraduationCap, title: "Consult", desc: "Book time with verified seniors and experts who've done it before." },
-  { icon: Briefcase, title: "Jobs", desc: "Referral-first roles shared inside the community, not scraped from the web." },
-  { icon: Shield, title: "Verified Only", desc: "Institute email verification on every single member. No noise, no bots." },
-];
-
-const STATS = [
-  { value: "23", label: "IIT campuses" },
-  { value: "100%", label: "Email verified" },
-  { value: "0", label: "Cost, forever" },
-];
 
 const Landing = () => {
   const navigate = useNavigate();
