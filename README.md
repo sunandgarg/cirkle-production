@@ -202,7 +202,9 @@ For a browser-only test deployment where the Supabase SMS and email functions
 are intentionally not deployed, set `VITE_ENABLE_TEST_OTP=true` at build time.
 Both OTP screens will show the normal six-digit input and accept `123456`.
 This flag bypasses authentication and delivery, so it must never be used in a
-production deployment.
+real production deployment. The tracked `.env.production` currently enables
+this mode temporarily for the Cloudflare test deployment and must be removed
+before real launch.
 
 Typical deployment commands:
 
