@@ -53,6 +53,7 @@ const IitVerification = () => {
   const [studentStatus, setStudentStatus] = useState<string>("");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [emailTestMode, setEmailTestMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -119,6 +120,7 @@ const IitVerification = () => {
         setLoading(false);
         return;
       }
+      setEmailTestMode(data?.test_mode === true);
       toast.success("Verification code sent to your email!");
       setStep("verify_otp");
     } catch (err: any) {
@@ -274,6 +276,12 @@ const IitVerification = () => {
             <p className="text-sm text-muted-foreground mb-6">
               Enter the 6-digit code sent to <span className="text-foreground font-medium">{email}</span>
             </p>
+            {emailTestMode && (
+              <div className="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center">
+                <p className="text-xs font-medium text-amber-600 dark:text-amber-400">Test mode</p>
+                <p className="mt-1 text-sm text-foreground">Use verification code <span className="font-mono font-bold tracking-widest">123456</span></p>
+              </div>
+            )}
             <div className="flex justify-center mb-6">
               <InputOTP maxLength={6} value={otp} onChange={setOtp}>
                 <InputOTPGroup>

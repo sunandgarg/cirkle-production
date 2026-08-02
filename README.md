@@ -194,6 +194,10 @@ appropriate for a private OTP sent to an arbitrary IIT address.
 3. Set a long random `VERIFICATION_CODE_SECRET`. It hashes stored email OTPs
    and must remain stable across function deployments.
 
+For local or isolated staging testing only, set `EMAIL_OTP_TEST_MODE=true`.
+The normal email OTP screen will open without sending an email and will accept
+`123456`. Never enable this flag in production.
+
 Typical deployment commands:
 
 ```sh

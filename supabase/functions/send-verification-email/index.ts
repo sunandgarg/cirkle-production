@@ -71,9 +71,10 @@ Deno.serve(async (req) => {
     const awsRegion = Deno.env.get("AWS_REGION");
     const fromEmail = Deno.env.get("AWS_SES_FROM_EMAIL");
     const codeSecret = Deno.env.get("VERIFICATION_CODE_SECRET");
+    const testMode = Deno.env.get("EMAIL_OTP_TEST_MODE") === "true";
     if (
-      !supabaseUrl || !anonKey || !serviceKey || !awsAccessKeyId ||
-      !awsSecretAccessKey || !awsRegion || !fromEmail || !codeSecret
+      !supabaseUrl || !anonKey || !serviceKey || !codeSecret ||
+      (!testMode && (!awsAccessKeyId || !awsSecretAccessKey || !awsRegion || !fromEmail))
     ) {
       return json(req, { error: "Email verification is not configured" }, 503);
     }
@@ -148,7 +149,7 @@ Deno.serve(async (req) => {
 
     const random = new Uint32Array(1);
     crypto.getRandomValues(random);
-    const code = String(100000 + (random[0] % 900000));
+    const code = testMode ? "123456" : String(100000 + (random[0] % 900000));
     const codeHash = await hashCode(normalizedEmail, code, codeSecret);
     const { data: codeRow, error: insertError } = await admin
       .from("verification_codes")
@@ -163,41 +164,43 @@ Deno.serve(async (req) => {
       .single();
     if (insertError) throw insertError;
 
-    const ses = new SESv2Client({
-      region: awsRegion,
-      credentials: {
-        accessKeyId: awsAccessKeyId,
-        secretAccessKey: awsSecretAccessKey,
-        ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
-      },
-    });
-    try {
-      await ses.send(new SendEmailCommand({
-        FromEmailAddress: fromEmail,
-        Destination: { ToAddresses: [normalizedEmail] },
-        Content: {
-          Simple: {
-            Subject: { Data: "Your Cirkle verification code", Charset: "UTF-8" },
-            Body: {
-              Text: {
-                Data: `Your Cirkle verification code is ${code}. It expires in 10 minutes.`,
-                Charset: "UTF-8",
-              },
-              Html: {
-                Data: `<p>Your Cirkle verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in 10 minutes.</p>`,
-                Charset: "UTF-8",
+    if (!testMode) {
+      const ses = new SESv2Client({
+        region: awsRegion!,
+        credentials: {
+          accessKeyId: awsAccessKeyId!,
+          secretAccessKey: awsSecretAccessKey!,
+          ...(awsSessionToken ? { sessionToken: awsSessionToken } : {}),
+        },
+      });
+      try {
+        await ses.send(new SendEmailCommand({
+          FromEmailAddress: fromEmail!,
+          Destination: { ToAddresses: [normalizedEmail] },
+          Content: {
+            Simple: {
+              Subject: { Data: "Your Cirkle verification code", Charset: "UTF-8" },
+              Body: {
+                Text: {
+                  Data: `Your Cirkle verification code is ${code}. It expires in 10 minutes.`,
+                  Charset: "UTF-8",
+                },
+                Html: {
+                  Data: `<p>Your Cirkle verification code is:</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>This code expires in 10 minutes.</p>`,
+                  Charset: "UTF-8",
+                },
               },
             },
           },
-        },
-      }));
-    } catch (emailError) {
-      await admin.from("verification_codes").delete().eq("id", codeRow.id);
-      console.error("Amazon SES rejected verification email", emailError);
-      return json(req, { error: "Verification email could not be sent" }, 502);
+        }));
+      } catch (emailError) {
+        await admin.from("verification_codes").delete().eq("id", codeRow.id);
+        console.error("Amazon SES rejected verification email", emailError);
+        return json(req, { error: "Verification email could not be sent" }, 502);
+      }
     }
 
-    return json(req, { success: true });
+    return json(req, { success: true, test_mode: testMode });
   } catch (error) {
     console.error("send-verification-email failed", error);
     return json(req, { error: "Unable to send verification email" }, 500);
