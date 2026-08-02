@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { isOtpTestModeEnabled } from "@/lib/otpTestMode";
 
 const OtpVerification = () => {
   const [otp, setOtp] = useState("");
@@ -14,6 +15,7 @@ const OtpVerification = () => {
   const phone = (location.state as any)?.phone || "";
   const countryCode = (location.state as any)?.countryCode || "+91";
   const fullPhone = (location.state as any)?.fullPhone || `${countryCode}${phone}`;
+  const testMode = isOtpTestModeEnabled() && (location.state as any)?.testMode === true;
 
   if (!phone) {
     return (
@@ -31,6 +33,12 @@ const OtpVerification = () => {
     
     setLoading(true);
     try {
+      if (testMode) {
+        if (otp !== "123456") throw new Error("Use 123456 for this test deployment");
+        toast.success("Test phone verification complete!");
+        navigate("/iit-verify", { state: { testMode: true }, replace: true });
+        return;
+      }
       const { error } = await supabase.auth.verifyOtp({
         phone: fullPhone,
         token: otp,
@@ -48,6 +56,10 @@ const OtpVerification = () => {
   };
 
   const handleResend = async () => {
+    if (testMode) {
+      toast.success("Test OTP is 123456");
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({ phone: fullPhone });
     setLoading(false);
@@ -70,6 +82,12 @@ const OtpVerification = () => {
         <p className="text-sm text-muted-foreground mt-2 text-center">
           Enter the 6-digit code sent to <span className="text-foreground font-medium">{countryCode} {phone}</span>
         </p>
+        {testMode && (
+          <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center">
+            <p className="text-xs font-medium text-amber-600 dark:text-amber-400">Test mode</p>
+            <p className="mt-1 text-sm text-foreground">Use verification code <span className="font-mono font-bold tracking-widest">123456</span></p>
+          </div>
+        )}
         <div className="mt-8">
           <InputOTP maxLength={6} value={otp} onChange={setOtp}>
             <InputOTPGroup>

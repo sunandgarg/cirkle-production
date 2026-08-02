@@ -8,6 +8,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { toast } from "sonner";
 import { ArrowLeft, GraduationCap, CheckCircle2, Mail, ShieldCheck } from "lucide-react";
 import PostVerifyOnboarding from "@/components/PostVerifyOnboarding";
+import { isOtpTestModeEnabled } from "@/lib/otpTestMode";
 
 const IIT_LIST = [
   { name: "IIT Bombay", studentDomain: "iitb.ac.in", alumniDomain: "alumni.iitb.ac.in" },
@@ -87,6 +88,12 @@ const IitVerification = () => {
     }
     setLoading(true);
     try {
+      if (isOtpTestModeEnabled()) {
+        setEmailTestMode(true);
+        toast.success("Test verification code is ready");
+        setStep("verify_otp");
+        return;
+      }
       const res = await supabase.functions.invoke("send-verification-email", {
         body: {
           email: email.trim().toLowerCase(),
@@ -135,6 +142,12 @@ const IitVerification = () => {
     setLoading(true);
     try {
       const normalizedEmail = email.trim().toLowerCase();
+      if (emailTestMode && isOtpTestModeEnabled()) {
+        if (otp !== "123456") throw new Error("Use 123456 for this test deployment");
+        toast.success("Test email verification complete!");
+        setStep("onboarding");
+        return;
+      }
       const { data, error } = await supabase.functions.invoke("verify-iit-email", {
         body: {
           email: normalizedEmail,

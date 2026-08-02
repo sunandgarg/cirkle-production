@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { isOtpTestModeEnabled } from "@/lib/otpTestMode";
 
 const Auth = () => {
   const [phone, setPhone] = useState("");
@@ -34,6 +35,11 @@ const Auth = () => {
     }
     setLoading(true);
     const fullPhone = `+91${phone}`;
+    if (isOtpTestModeEnabled()) {
+      setLoading(false);
+      navigate("/otp-verify", { state: { fullPhone, phone, countryCode: "+91", testMode: true } });
+      return;
+    }
     const { error } = await supabase.auth.signInWithOtp({
       phone: fullPhone,
       options: { shouldCreateUser: true },

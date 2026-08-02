@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import IitVerification from "./IitVerification";
 
 const mocks = vi.hoisted(() => ({
@@ -29,6 +29,8 @@ vi.mock("@/components/PostVerifyOnboarding", () => ({
 }));
 
 describe("IIT email OTP test mode", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   beforeEach(() => {
     mocks.invoke.mockReset();
     mocks.refetchProfile.mockReset();
@@ -77,5 +79,32 @@ describe("IIT email OTP test mode", () => {
       });
     });
     expect(await screen.findByText("Onboarding shown")).toBeVisible();
+  });
+
+  it("can run the email OTP screen without Edge Functions in browser test mode", async () => {
+    vi.stubEnv("VITE_ENABLE_TEST_OTP", "true");
+    render(
+      <MemoryRouter>
+        <IitVerification />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByText("IIT Delhi", { exact: true }));
+    fireEvent.click(screen.getByText("🎓 Current Student", { exact: true }));
+    fireEvent.change(screen.getByPlaceholderText("yourname@iitd.ac.in"), {
+      target: { value: "student@iitd.ac.in" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send Verification Code" }));
+
+    expect(await screen.findByText("Test mode", { exact: true })).toBeVisible();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+
+    const otpInput = document.querySelector<HTMLInputElement>("input[data-input-otp]");
+    expect(otpInput).not.toBeNull();
+    fireEvent.change(otpInput!, { target: { value: "123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Verify & Continue" }));
+
+    expect(await screen.findByText("Onboarding shown")).toBeVisible();
+    expect(mocks.invoke).not.toHaveBeenCalled();
   });
 });

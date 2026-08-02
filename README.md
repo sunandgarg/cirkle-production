@@ -198,6 +198,12 @@ For local or isolated staging testing only, set `EMAIL_OTP_TEST_MODE=true`.
 The normal email OTP screen will open without sending an email and will accept
 `123456`. Never enable this flag in production.
 
+For a browser-only test deployment where the Supabase SMS and email functions
+are intentionally not deployed, set `VITE_ENABLE_TEST_OTP=true` at build time.
+Both OTP screens will show the normal six-digit input and accept `123456`.
+This flag bypasses authentication and delivery, so it must never be used in a
+production deployment.
+
 Typical deployment commands:
 
 ```sh
