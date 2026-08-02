@@ -11,8 +11,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
-const SUPER_ADMIN_PHONE = "8700602524";
-
 const Blogs = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();

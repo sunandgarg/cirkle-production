@@ -5,6 +5,24 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY");
+}
+
+if (SUPABASE_PUBLISHABLE_KEY.startsWith("sb_secret_")) {
+  throw new Error("A Supabase secret key must never be used in browser code");
+}
+
+try {
+  const url = new URL(SUPABASE_URL);
+  if (import.meta.env.PROD && url.protocol !== "https:") {
+    throw new Error("VITE_SUPABASE_URL must use HTTPS in production");
+  }
+} catch (error) {
+  if (error instanceof Error && error.message.includes("must use HTTPS")) throw error;
+  throw new Error("VITE_SUPABASE_URL is not a valid URL");
+}
+
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');

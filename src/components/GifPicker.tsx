@@ -23,7 +23,7 @@ const GifPicker = ({ onSelect, onClose }: GifPickerProps) => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeTab, setActiveTab] = useState<"gifs" | "stickers">("gifs");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const searchGifs = useCallback(async (q: string, type: string) => {
     setLoading(true);

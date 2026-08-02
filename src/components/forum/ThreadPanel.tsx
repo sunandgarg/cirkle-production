@@ -44,7 +44,7 @@ const ThreadPanel = ({ parentPost, onClose, activeScope, profileMap, navigate }:
   const { data: replies = [], isLoading } = useQuery({
     queryKey: ["thread-replies", parentPost.id],
     queryFn: async () => {
-      const { data: repliesData } = await supabase.from("posts")
+      const { data: repliesData } = await (supabase as any).from("visible_posts")
         .select("*")
         .eq("reply_to_id", parentPost.id)
         .is("deleted_at", null)

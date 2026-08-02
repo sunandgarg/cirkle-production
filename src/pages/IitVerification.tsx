@@ -47,7 +47,7 @@ type Step = "select_iit" | "select_status" | "verify_email" | "verify_otp" | "on
 
 const IitVerification = () => {
   const navigate = useNavigate();
-  const { user, refetchProfile } = useAuth();
+  const { refetchProfile } = useAuth();
   const [step, setStep] = useState<Step>("select_iit");
   const [selectedIit, setSelectedIit] = useState<typeof IIT_LIST[0] | null>(null);
   const [studentStatus, setStudentStatus] = useState<string>("");
@@ -80,15 +80,18 @@ const IitVerification = () => {
     const domain = email.split("@")[1]?.toLowerCase();
     const expectedDomain = getExpectedDomain();
     const isValidDomain = domain === expectedDomain || domain === selectedIit?.studentDomain;
-    const isAcademicEmail = domain?.endsWith(".ac.in");
-    if (!isValidDomain && !isAcademicEmail) {
+    if (!isValidDomain) {
       toast.error(`Please use a valid email from ${selectedIit?.name} (${expectedDomain})`);
       return;
     }
     setLoading(true);
     try {
       const res = await supabase.functions.invoke("send-verification-email", {
-        body: { email: email.trim().toLowerCase(), iit_name: selectedIit?.name, user_id: user?.id },
+        body: {
+          email: email.trim().toLowerCase(),
+          iit_name: selectedIit?.name,
+          student_status: studentStatus,
+        },
       });
       
       const data = res.data as any;
@@ -116,11 +119,7 @@ const IitVerification = () => {
         setLoading(false);
         return;
       }
-      if (data?.test_code) {
-        toast.success(`Test mode — use code: ${data.test_code}`, { duration: 10000 });
-      } else {
-        toast.success("Verification code sent to your email!");
-      }
+      toast.success("Verification code sent to your email!");
       setStep("verify_otp");
     } catch (err: any) {
       toast.error(err.message || "Failed to send verification code");
@@ -133,85 +132,18 @@ const IitVerification = () => {
     if (otp.length !== 6) { toast.error("Please enter the 6-digit code"); return; }
     setLoading(true);
     try {
-      const { data: testModeSetting } = await supabase
-        .from("app_settings")
-        .select("value")
-        .eq("key", "verification_test_mode")
-        .maybeSingle();
-      const isTestMode = testModeSetting?.value === "true";
-
-      let isValidCode = false;
       const normalizedEmail = email.trim().toLowerCase();
-
-      if (isTestMode && otp === "123456") {
-        isValidCode = true;
-      } else {
-        const { data: codeData } = await supabase
-          .from("verification_codes")
-          .select("*")
-          .eq("email", normalizedEmail)
-          .eq("code", otp)
-          .eq("used", false)
-          .gte("expires_at", new Date().toISOString())
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (codeData) {
-          isValidCode = true;
-          await supabase.from("verification_codes").update({ used: true } as any).eq("id", codeData.id);
-        }
-      }
-
-      if (!isValidCode) {
-        toast.error("Invalid or expired code. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (user) {
-        // Get user's phone for locking
-        const userPhone = (user as any).phone || (user as any).user_metadata?.phone || "";
-
-        // Upsert verification record
-        const { data: existingVerif } = await supabase
-          .from("verifications")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (existingVerif) {
-          await supabase.from("verifications").update({
-            iit_email: normalizedEmail,
-            iit_email_normalized: normalizedEmail,
-            iit_domain: normalizedEmail.split("@")[1],
-            email_verified_at: new Date().toISOString(),
-            verified_status: "VERIFIED",
-            locked_to_phone: userPhone,
-            updated_at: new Date().toISOString(),
-          }).eq("id", existingVerif.id);
-        } else {
-          await supabase.from("verifications").insert({
-            user_id: user.id,
-            iit_email: normalizedEmail,
-            iit_email_normalized: normalizedEmail,
-            iit_domain: normalizedEmail.split("@")[1],
-            email_verified_at: new Date().toISOString(),
-            verified_status: "VERIFIED",
-            locked_to_phone: userPhone,
-          });
-        }
-
-        // Update profile with verified status
-        await supabase.from("profiles").update({
+      const { data, error } = await supabase.functions.invoke("verify-iit-email", {
+        body: {
+          email: normalizedEmail,
+          code: otp,
           iit_name: selectedIit?.name,
           student_status: studentStatus,
-          iit_email: normalizedEmail,
-          is_verified: true,
-        } as any).eq("user_id", user.id);
-
-        await refetchProfile();
-      }
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      await refetchProfile();
 
       toast.success("Verified! Now let's complete your profile 🎉");
       setStep("onboarding");

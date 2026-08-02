@@ -42,7 +42,7 @@ const Chats = () => {
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Only fetch connected friends for DM

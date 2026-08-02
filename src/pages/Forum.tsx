@@ -124,7 +124,7 @@ const buildScopes = (profile: any, education: any): ScopeDef[] => {
 
 /* ─── Build query for a scope ─── */
 const buildScopeQuery = (scopeType: string, scopeKey: string) => {
-  let q = supabase.from("posts").select("*")
+  let q = (supabase as any).from("visible_posts").select("*")
     .is("reply_to_id", null)
     .is("deleted_at", null)
     .order("created_at", { ascending: true }).limit(200) as any;
@@ -188,7 +188,7 @@ const Forum = () => {
   const [showFormatBar, setShowFormatBar] = useState(false);
   /* (activeServerId/channelCollapsed removed) */
 
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -356,7 +356,7 @@ const Forum = () => {
       const [{ data: profiles }, { data: polls }, { data: replies }, { data: reactions }] = await Promise.all([
         supabase.from("profiles").select("user_id, name, avatar_url, iit_name, student_status, slug").in("user_id", authorIds),
         supabase.from("polls").select("*").in("post_id", postIds),
-        supabase.from("posts").select("id, reply_to_id").in("reply_to_id", postIds).is("deleted_at", null),
+        (supabase as any).from("visible_posts").select("id, reply_to_id").in("reply_to_id", postIds).is("deleted_at", null),
         supabase.from("reactions").select("*").in("entity_id", postIds).eq("entity_type", "forum_msg"),
       ]);
 
@@ -1589,7 +1589,7 @@ const DiscordMessage = ({ post, onReply, onReact, userId, isAdmin, onAdminPin, o
   const [showEmoji, setShowEmoji] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [showSeenBy, setShowSeenBy] = useState(false);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const swipeStartXRef = useRef<number | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const swipeThreshold = 60;
@@ -1807,7 +1807,7 @@ const DiscordMessage = ({ post, onReply, onReact, userId, isAdmin, onAdminPin, o
       {!isDeleted && (
         <div className="absolute -top-3.5 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
           <div className="flex items-center bg-card border border-border rounded-md shadow-md overflow-hidden">
-            <button onClick={() => { showEmoji ? setShowEmoji(false) : openEmoji(); }} className="w-8 h-8 flex items-center justify-center hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"><Smile className="w-4 h-4" /></button>
+            <button onClick={() => { if (showEmoji) setShowEmoji(false); else openEmoji(); }} className="w-8 h-8 flex items-center justify-center hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"><Smile className="w-4 h-4" /></button>
             <button onClick={() => onReply(post)} className="w-8 h-8 flex items-center justify-center hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"><Reply className="w-4 h-4" /></button>
             <button onClick={() => onThread(post)} className="w-8 h-8 flex items-center justify-center hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"><MessageSquare className="w-4 h-4" /></button>
             <button onClick={() => openActions()} className="w-8 h-8 flex items-center justify-center hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"><MoreHorizontal className="w-4 h-4" /></button>

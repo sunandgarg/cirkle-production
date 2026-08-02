@@ -25,9 +25,9 @@ export const usePrefetch = (userId: string | undefined, profile: any) => {
       queryClient.prefetchQuery({
         queryKey: ["forum-posts", "global", userIit, cohortKey],
         queryFn: async () => {
-          const { data } = await supabase.from("posts").select("*").eq("channel", "global").order("created_at", { ascending: true }).limit(50);
+          const { data } = await (supabase as any).from("visible_posts").select("*").eq("channel", "global").order("created_at", { ascending: true }).limit(50);
           if (!data?.length) return [];
-          const ids = [...new Set(data.map((p) => p.author_id))];
+          const ids = [...new Set<string>(data.map((p: any) => p.author_id).filter(Boolean))];
           const { data: profiles } = await supabase.from("profiles").select("user_id, name, avatar_url, iit_name, student_status").in("user_id", ids);
           const map = new Map(profiles?.map((p) => [p.user_id, p]) ?? []);
           return data.map((post) => ({ ...post, profile: map.get(post.author_id) ?? null }));
@@ -39,9 +39,9 @@ export const usePrefetch = (userId: string | undefined, profile: any) => {
         queryClient.prefetchQuery({
           queryKey: ["forum-posts", "campus", userIit, cohortKey],
           queryFn: async () => {
-            const { data } = await supabase.from("posts").select("*").eq("channel", "campus").eq("campus_filter", userIit).order("created_at", { ascending: true }).limit(50);
+            const { data } = await (supabase as any).from("visible_posts").select("*").eq("channel", "campus").eq("campus_filter", userIit).order("created_at", { ascending: true }).limit(50);
             if (!data?.length) return [];
-            const ids = [...new Set(data.map((p) => p.author_id))];
+            const ids = [...new Set<string>(data.map((p: any) => p.author_id).filter(Boolean))];
             const { data: profiles } = await supabase.from("profiles").select("user_id, name, avatar_url, iit_name, student_status").in("user_id", ids);
             const map = new Map(profiles?.map((p) => [p.user_id, p]) ?? []);
             return data.map((post) => ({ ...post, profile: map.get(post.author_id) ?? null }));
@@ -54,9 +54,9 @@ export const usePrefetch = (userId: string | undefined, profile: any) => {
         queryClient.prefetchQuery({
           queryKey: ["forum-posts", "cohort", userIit, cohortKey],
           queryFn: async () => {
-            const { data } = await supabase.from("posts").select("*").eq("channel", "cohort").eq("cohort_filter", cohortKey).order("created_at", { ascending: true }).limit(50);
+            const { data } = await (supabase as any).from("visible_posts").select("*").eq("channel", "cohort").eq("cohort_filter", cohortKey).order("created_at", { ascending: true }).limit(50);
             if (!data?.length) return [];
-            const ids = [...new Set(data.map((p) => p.author_id))];
+            const ids = [...new Set<string>(data.map((p: any) => p.author_id).filter(Boolean))];
             const { data: profiles } = await supabase.from("profiles").select("user_id, name, avatar_url, iit_name, student_status").in("user_id", ids);
             const map = new Map(profiles?.map((p) => [p.user_id, p]) ?? []);
             return data.map((post) => ({ ...post, profile: map.get(post.author_id) ?? null }));
@@ -75,10 +75,10 @@ export const usePrefetch = (userId: string | undefined, profile: any) => {
       queryClient.prefetchQuery({
         queryKey: ["home-posts", friendIds],
         queryFn: async () => {
-          const { data } = await supabase.from("posts").select("*").in("author_id", allowedIds).eq("is_anonymous", false)
+          const { data } = await (supabase as any).from("visible_posts").select("*").in("author_id", allowedIds).eq("is_anonymous", false)
             .order("created_at", { ascending: false }).limit(25);
           if (!data?.length) return [];
-          const authorIds = [...new Set(data.map((p) => p.author_id))];
+          const authorIds = [...new Set<string>(data.map((p: any) => p.author_id).filter(Boolean))];
           const { data: profiles } = await supabase.from("profiles").select("user_id, name, headline, avatar_url, is_verified").in("user_id", authorIds);
           const map = new Map(profiles?.map((p) => [p.user_id, p]) ?? []);
           return data.map((post) => ({ ...post, profile: map.get(post.author_id) }));

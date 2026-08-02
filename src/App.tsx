@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,32 +7,37 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import AppLayout from "@/components/AppLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Landing from "@/pages/Landing";
-import Auth from "@/pages/Auth";
-import OtpVerification from "@/pages/OtpVerification";
-import IitVerification from "@/pages/IitVerification";
-// import HomePage from "@/pages/HomePage"; // COMMENTED OUT — Forum is primary
-import Forum from "@/pages/Forum";
-import CalendarPage from "@/pages/CalendarPage";
-import Network from "@/pages/Network";
-import Consult from "@/pages/Consult";
-import Jobs from "@/pages/Jobs";
-import Profile from "@/pages/Profile";
-import Chats from "@/pages/Chats";
-import Settings from "@/pages/Settings";
-import Admin from "@/pages/Admin";
-import Blogs from "@/pages/Blogs";
-import NotFound from "@/pages/NotFound";
+const Landing = lazy(() => import("@/pages/Landing"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const OtpVerification = lazy(() => import("@/pages/OtpVerification"));
+const IitVerification = lazy(() => import("@/pages/IitVerification"));
+const Forum = lazy(() => import("@/pages/Forum"));
+const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
+const Network = lazy(() => import("@/pages/Network"));
+const Consult = lazy(() => import("@/pages/Consult"));
+const Jobs = lazy(() => import("@/pages/Jobs"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Chats = lazy(() => import("@/pages/Chats"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Admin = lazy(() => import("@/pages/Admin"));
+const Blogs = lazy(() => import("@/pages/Blogs"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+
+const RouteFallback = () => (
+  <div className="flex min-h-screen items-center justify-center bg-background" role="status" aria-label="Loading page">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 // Global QueryClient — data stays cached until explicit refresh
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: Infinity,
-      gcTime: 1000 * 60 * 60,
-      refetchOnWindowFocus: false,
+      staleTime: 30_000,
+      gcTime: 1000 * 60 * 10,
+      refetchOnWindowFocus: true,
       refetchOnMount: false,
-      refetchOnReconnect: false,
+      refetchOnReconnect: true,
       retry: 1,
     },
   },
@@ -44,6 +50,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Landing />} />
@@ -106,6 +113,7 @@ const App = () => (
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

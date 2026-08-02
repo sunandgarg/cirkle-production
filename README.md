@@ -133,6 +133,91 @@ Prefer working locally? You need Node.js and npm — [install with nvm](https://
 ```sh
 git clone <this-repository-url>
 cd <repository-name>
-npm i
+npm ci
 npm run dev
 ```
+
+Node.js 20.19 or newer is required. Copy `.env.example` to `.env` and fill in
+the public Supabase values before starting the app.
+
+## Production deployment
+
+Before deploying a fresh Supabase project:
+
+1. Link the Supabase CLI to the project and run all migrations.
+2. Deploy the Edge Functions in `supabase/functions`.
+3. Configure Supabase Phone Auth and Google OAuth, including the production
+   site URL and redirect URLs. Set the phone OTP length to 6 and expiry to
+   600 seconds.
+4. Copy the server-only values listed in `supabase/.env.example` into Supabase
+   Edge Function secrets. Add `GIPHY_API_KEY` if GIF search is enabled.
+5. Create the first admin role through a trusted SQL/admin workflow. The web
+   client intentionally cannot promote a user to admin.
+
+### SMS OTP: Fast2SMS
+
+Phone login remains a Supabase Auth OTP flow, so Supabase validates the code
+and creates the user session. Its Send SMS HTTP Hook calls Fast2SMS using the
+approved OTP template `9318bdac9f` (sender `DKCMPS`, entity
+`1701170910413783014`). The template is tied to the Fast2SMS account, so the
+hook only needs the OTP template ID and API key.
+
+1. Deploy `send-sms-hook` with JWT verification disabled (already declared in
+   `supabase/config.toml`).
+2. In Supabase Dashboard, open **Authentication → Hooks → Send SMS** and choose
+   an HTTP hook.
+3. Use
+   `https://huiyemdoomihtyivuwsd.supabase.co/functions/v1/send-sms-hook` as the
+   hook URL.
+4. Generate a Standard Webhooks secret in the form
+   `v1,whsec_<base64-secret>`. Configure the same value in the Auth Hook and as
+   the Edge Function secret `SEND_SMS_HOOK_SECRET`.
+5. Set `FAST2SMS_API_KEY` and `FAST2SMS_OTP_ID=9318bdac9f` as Edge Function
+   secrets. Never add either value to a `VITE_*` variable.
+
+Fast2SMS accepts a 10-digit Indian mobile number for this endpoint, so the UI
+intentionally supports `+91` numbers for phone OTP login.
+
+### IIT email OTP: Amazon SES direct API
+
+Private, transactional OTP email uses Amazon SES `SendEmail`. Amazon SNS email
+is topic-based: recipients must first confirm a subscription, and publishing
+would fan the same message out to topic subscribers. That is not safe or
+appropriate for a private OTP sent to an arbitrary IIT address.
+
+1. In Amazon SES, verify the sender email/domain in the same region configured
+   by `AWS_REGION` and request production access if the account is still in the
+   SES sandbox.
+2. Create an IAM principal limited to `ses:SendEmail` for the verified SES
+   identity, then set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+   `AWS_REGION`, and `AWS_SES_FROM_EMAIL` as Supabase secrets.
+3. Set a long random `VERIFICATION_CODE_SECRET`. It hashes stored email OTPs
+   and must remain stable across function deployments.
+
+Typical deployment commands:
+
+```sh
+supabase login
+supabase link --project-ref huiyemdoomihtyivuwsd
+supabase db push
+supabase secrets set --env-file supabase/.env.local
+supabase functions deploy send-sms-hook --no-verify-jwt
+supabase functions deploy send-verification-email
+supabase functions deploy verify-iit-email
+```
+
+Cloudflare Pages settings:
+
+```text
+Build command: npm run build
+Build output directory: dist
+Node version: 20.19 or newer
+
+VITE_SUPABASE_PROJECT_ID=<project id>
+VITE_SUPABASE_URL=https://<project id>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<publishable key>
+```
+
+Never expose a Supabase secret/service-role key through a `VITE_*` variable.
+Cloudflare SPA routing and baseline security headers are provided by
+`public/_redirects` and `public/_headers`.

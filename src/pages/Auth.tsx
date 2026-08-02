@@ -1,43 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown } from "lucide-react";
-
-const COUNTRY_CODES = [
-  { code: "+91", flag: "🇮🇳", name: "India" },
-  { code: "+1", flag: "🇺🇸", name: "USA" },
-  { code: "+44", flag: "🇬🇧", name: "UK" },
-  { code: "+61", flag: "🇦🇺", name: "Australia" },
-  { code: "+971", flag: "🇦🇪", name: "UAE" },
-  { code: "+65", flag: "🇸🇬", name: "Singapore" },
-  { code: "+49", flag: "🇩🇪", name: "Germany" },
-  { code: "+33", flag: "🇫🇷", name: "France" },
-  { code: "+81", flag: "🇯🇵", name: "Japan" },
-  { code: "+86", flag: "🇨🇳", name: "China" },
-  { code: "+82", flag: "🇰🇷", name: "South Korea" },
-  { code: "+7", flag: "🇷🇺", name: "Russia" },
-  { code: "+55", flag: "🇧🇷", name: "Brazil" },
-  { code: "+27", flag: "🇿🇦", name: "South Africa" },
-  { code: "+234", flag: "🇳🇬", name: "Nigeria" },
-  { code: "+254", flag: "🇰🇪", name: "Kenya" },
-  { code: "+60", flag: "🇲🇾", name: "Malaysia" },
-  { code: "+66", flag: "🇹🇭", name: "Thailand" },
-  { code: "+62", flag: "🇮🇩", name: "Indonesia" },
-  { code: "+63", flag: "🇵🇭", name: "Philippines" },
-];
 
 const Auth = () => {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
-  const [showCountry, setShowCountry] = useState(false);
-  const [country, setCountry] = useState(COUNTRY_CODES[0]);
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
@@ -49,22 +23,35 @@ const Auth = () => {
   }, [user, authLoading, navigate]);
 
   const handlePhoneChange = (value: string) => {
-    // Only allow digits, max 10
     const digits = value.replace(/\D/g, "").slice(0, 10);
     setPhone(digits);
   };
 
-  const handleContinue = () => {
-    if (phone.length !== 10) {
-      toast.error("Please enter a valid 10-digit mobile number");
+  const handleContinue = async () => {
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      toast.error("Please enter a valid 10-digit Indian mobile number");
       return;
     }
-    navigate("/otp-verify", { state: { phone, countryCode: country.code } });
+    setLoading(true);
+    const fullPhone = `+91${phone}`;
+    const { error } = await supabase.auth.signInWithOtp({
+      phone: fullPhone,
+      options: { shouldCreateUser: true },
+    });
+    setLoading(false);
+
+    if (error) {
+      toast.error(error.message || "Unable to send the verification code");
+      return;
+    }
+
+    navigate("/otp-verify", { state: { fullPhone, phone, countryCode: "+91" } });
   };
 
   const handleGoogleLogin = async () => {
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/cirkle-forum` },
     });
     if (error) {
       toast.error("Google sign-in failed");
@@ -99,19 +86,14 @@ const Auth = () => {
         <p className="text-sm text-muted-foreground mt-1 mb-4">Sign up or login to your account</p>
 
         <div className="flex items-center gap-2 mb-4">
-          {/* Country code selector */}
-          <button
-            onClick={() => setShowCountry(true)}
-            className="h-12 px-3 rounded-xl bg-secondary border border-border flex items-center gap-1.5 flex-shrink-0 hover:bg-accent transition-colors"
-          >
-            <span className="text-lg">{country.flag}</span>
-            <span className="text-foreground text-sm font-medium">{country.code}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
+          <div className="h-12 px-3 rounded-xl bg-secondary border border-border flex items-center gap-1.5 flex-shrink-0">
+            <span className="text-lg">🇮🇳</span>
+            <span className="text-foreground text-sm font-medium">+91</span>
+          </div>
           <Input
             type="tel"
             inputMode="numeric"
-            placeholder="Enter 10-digit number"
+            placeholder="Enter mobile number"
             value={phone}
             onChange={(e) => handlePhoneChange(e.target.value)}
             className="bg-secondary border-border text-foreground placeholder:text-muted-foreground h-12 rounded-xl focus:border-primary flex-1"
@@ -122,7 +104,7 @@ const Auth = () => {
 
         {/* Digit count indicator */}
         <p className={`text-xs mb-2 ${phone.length === 10 ? "text-green-500" : "text-muted-foreground"}`}>
-          {phone.length}/10 digits
+          {phone.length} digits
         </p>
 
         <Button
@@ -131,7 +113,7 @@ const Auth = () => {
           onClick={handleContinue}
           disabled={loading || phone.length !== 10}
         >
-          Continue
+          {loading ? "Sending code…" : "Continue"}
         </Button>
 
         <div className="flex items-center gap-4 my-4">
@@ -159,28 +141,6 @@ const Auth = () => {
           <button onClick={() => setShowPrivacy(true)} className="underline text-muted-foreground hover:text-foreground transition-colors">Privacy policy</button>
         </p>
       </div>
-
-      {/* Country code picker */}
-      <Dialog open={showCountry} onOpenChange={setShowCountry}>
-        <DialogContent className="max-w-sm max-h-[70vh]">
-          <DialogHeader><DialogTitle>Select Country</DialogTitle></DialogHeader>
-          <div className="space-y-1 overflow-y-auto max-h-[50vh]">
-            {COUNTRY_CODES.map((c) => (
-              <button
-                key={c.code}
-                onClick={() => { setCountry(c); setShowCountry(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                  country.code === c.code ? "bg-primary/10" : "hover:bg-muted/50"
-                }`}
-              >
-                <span className="text-xl">{c.flag}</span>
-                <span className="text-sm font-medium text-foreground flex-1 text-left">{c.name}</span>
-                <span className="text-sm text-muted-foreground">{c.code}</span>
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Terms Dialog */}
       <Dialog open={showTerms} onOpenChange={setShowTerms}>

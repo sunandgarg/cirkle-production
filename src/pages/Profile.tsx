@@ -129,7 +129,7 @@ const Profile = () => {
     queryFn: async () => {
       if (!targetId) return [];
       // Only show home feed posts (channel is null), exclude forum messages
-      const { data: posts } = await supabase.from("posts").select("*").eq("author_id", targetId).eq("is_anonymous", false)
+      const { data: posts } = await (supabase as any).from("visible_posts").select("*").eq("author_id", targetId).eq("is_anonymous", false)
         .is("channel", null)
         .order("created_at", { ascending: false }).limit(20);
       return (posts || []).map(p => ({ type: p.reshared_post_id ? "reshare" : "post", data: p, date: p.created_at }))
@@ -143,7 +143,7 @@ const Profile = () => {
     queryFn: async () => {
       if (!targetId) return { posts: 0, connections: 0, sessions: 0 };
       const [postsRes, connectionsRes, sessionsRes] = await Promise.all([
-        supabase.from("posts").select("id", { count: "exact", head: true }).eq("author_id", targetId),
+        (supabase as any).from("visible_posts").select("id", { count: "exact", head: true }).eq("author_id", targetId),
         supabase.from("connections").select("id", { count: "exact", head: true })
           .or(`requester_id.eq.${targetId},receiver_id.eq.${targetId}`).eq("status", "accepted"),
         supabase.from("consultations").select("id", { count: "exact", head: true })

@@ -1291,7 +1291,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      ensure_super_admin: { Args: { p_user_id: string }; Returns: undefined }
       generate_profile_slug: {
         Args: { p_name: string; p_user_id: string }
         Returns: string

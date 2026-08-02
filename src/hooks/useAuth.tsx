@@ -2,9 +2,6 @@ import { useState, useEffect, createContext, useContext, useCallback, ReactNode,
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
-// ⚠️ HARDCODED SUPER ADMIN — DO NOT MODIFY ⚠️
-const SUPER_ADMIN_PHONE = "8700602524";
-
 interface AuthContextType {
   user: User | null;
   profile: any;
@@ -17,14 +14,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null, profile: null, loading: true, isAdmin: false, isVerified: false, refetchProfile: async () => {},
 });
-
-const ensureSuperAdmin = async (userId: string) => {
-  await supabase.rpc("ensure_super_admin", { p_user_id: userId });
-};
-
-const isSuperAdminUser = (u: User): boolean => {
-  return !!u.phone && u.phone.includes(SUPER_ADMIN_PHONE);
-};
 
 const fetchProfileAndAdmin = async (userId: string) => {
   const [profileRes, adminRes] = await Promise.all([
@@ -46,9 +35,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loadUserData = useCallback(async (u: User) => {
     try {
-      if (isSuperAdminUser(u)) {
-        await ensureSuperAdmin(u.id);
-      }
       const { profile: p, isAdmin: admin } = await fetchProfileAndAdmin(u.id);
       setUser(u);
       setProfile(p);

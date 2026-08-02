@@ -289,8 +289,8 @@ const HomePage = () => {
       
       // Fetch from connections first
       const connectionIds = [...(friendIds || []), user.id];
-      const { data: connPosts } = await supabase
-        .from("posts")
+      const { data: connPosts } = await (supabase as any)
+        .from("visible_posts")
         .select("*")
         .in("author_id", connectionIds)
         .eq("is_anonymous", false)
@@ -304,8 +304,8 @@ const HomePage = () => {
       if (combinedPosts.length < PAGE_SIZE) {
         const remaining = PAGE_SIZE - combinedPosts.length;
         const existingIds = combinedPosts.map(p => p.id);
-        const { data: globalPosts } = await supabase
-          .from("posts")
+        const { data: globalPosts } = await (supabase as any)
+          .from("visible_posts")
           .select("*")
           .eq("is_anonymous", false)
           .is("channel", null)
@@ -318,7 +318,7 @@ const HomePage = () => {
       if (combinedPosts.length < PAGE_SIZE) setHasMorePosts(false);
       if (!combinedPosts.length) return [];
       
-      const authorIds = [...new Set(combinedPosts.map((p) => p.author_id))];
+      const authorIds = [...new Set<string>(combinedPosts.map((p: any) => p.author_id).filter(Boolean))];
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, name, headline, avatar_url, is_verified, slug")

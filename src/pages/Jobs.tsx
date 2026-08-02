@@ -140,8 +140,7 @@ const Jobs = () => {
   const filtered = useMemo(() => {
     if (!jobs) return [];
     let result = jobs;
-    if (activeFilter === 1) result = result; // Easy Apply = show all (just different apply UX)
-    else if (activeFilter === 2) result = result.filter((j: any) => j.job_type?.toLowerCase().includes("intern"));
+    if (activeFilter === 2) result = result.filter((j: any) => j.job_type?.toLowerCase().includes("intern"));
     else if (activeFilter === 3) result = result.filter((j: any) => j.job_type?.toLowerCase().includes("full"));
     else if (activeFilter === 4) result = result.filter((j: any) => j.job_type?.toLowerCase().includes("part"));
     else if (activeFilter === 5) result = result.filter((j: any) => j.location?.toLowerCase().includes("remote"));
